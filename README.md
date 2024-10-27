@@ -215,3 +215,107 @@ if ($result->num_rows > 0) {
   }
   echo "</table>";
 }
+<form action="add_student.php" method="post">
+  <label>Student ID:</label>
+  <input type="text" name="student_id">
+  <br>
+  <label>Name:</label>
+  <input type="text" name="name">
+  <br>
+  <label>Email:</label>
+  <input type="email" name="email">
+  <br>
+  <label>Phone:</label>
+  <input type="text" name="phone">
+  <br>
+  <button type="submit">Add Student</button>
+</form>
+
+
+add_student.php
+
+<?php
+$student_id = $_POST['student_id'];
+$name = $_POST['name'];
+$email = $_POST['email'];
+$phone = $_POST['phone'];
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+$query = "INSERT INTO students (student_id, name, email, phone) VALUES ('$student_id', '$name', '$email', '$phone')";
+$conn->query($query);
+
+$conn->close();
+header("Location: admin.php");
+exit;
+?>
+
+
+Option 2: Bulk Upload (CSV)
+
+1. Create a form in the admin dashboard to upload a CSV file.
+2. Use PHP to parse the CSV file and insert data into the database.
+
+admin.php
+
+<form action="upload_students.php" method="post" enctype="multipart/form-data">
+  <label>Upload CSV file:</label>
+  <input type="file" name="csv_file">
+  <br>
+  <button type="submit">Upload</button>
+</form>
+
+
+upload_students.php
+
+<?php
+$csv_file = $_FILES['csv_file']['tmp_name'];
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+$fp = fopen($csv_file, 'r');
+while ($row = fgetcsv($fp)) {
+  $student_id = $row[0];
+  $name = $row[1];
+  $email = $row[2];
+  $phone = $row[3];
+
+  $query = "INSERT INTO students (student_id, name, email, phone) VALUES ('$student_id', '$name', '$email', '$phone')";
+  $conn->query($query);
+}
+
+fclose($fp);
+$conn->close();
+header("Location: admin.php");
+exit;
+?>
+
+
+Option 3: Integration with Existing Student Information System
+
+1. Use APIs or database connections to integrate with existing systems.
+2. Map the data fields to match your portal's database schema.
+
+Consult with your institution's IT department or student information system administrators to explore this option.
+
+After adding students' information, you can display it on the portal using PHP and HTML.
+
+display_students.php
+
+<?php
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+$query = "SELECT * FROM students";
+$result = $conn->query($query);
+
+echo "<table border='1'>";
+echo "<tr><th>Student ID</th><th>Name</th><th>Email</th><th>Phone</th></tr>";
+
+while ($row = $result->fetch_assoc()) {
+  echo "<tr><td>$row[student_id]</td><td>$row[name]</td><td>$row[email]</td><td>$row[phone]</td></tr>";
+}
+
+echo "</table>";
+
+$conn->close();
+?>
